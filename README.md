@@ -13,4 +13,5 @@ A demonstration on local computer is possible with XAMPP server. However, one ca
 
 ![Start page](/assets/images/interface1.png)
 ![Result page Top](/assets/images/interface2.png)
+...
 ![Result page Bottom](/assets/images/interface3.png)
