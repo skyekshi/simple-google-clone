@@ -9,6 +9,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.stream.Collectors;
 
 public class pageRank {
     private Map<String, List<String>> invertedFile;
@@ -156,32 +159,86 @@ public class pageRank {
     }
     
     private int getDocumentFrequency(String term) {
-        // Implement the logic to retrieve the document frequency (DF) of the given term
-        // Return the document frequency of the term
+        // Retrieve the inverted file data structure
+        Map<String, List<String>> invertedFile = getInvertedFile(); // Replace with your actual implementation
+    
+        // Check if the term exists in the inverted file
+        if (invertedFile.containsKey(term)) {
+            List<String> documents = invertedFile.get(term);
+            return documents.size(); // Return the document frequency
+        }
+    
+        return 0; // The term doesn't exist in the inverted file, so return 0
+    }    
+    
+
+    private boolean checkIfTermInTitle(String term, String documentTitle) {
+        // Remove unwanted characters and perform case-insensitive matching
+        String cleanedTerm = term.toLowerCase().replaceAll("[^a-zA-Z0-9]", "");
+        String cleanedTitle = documentTitle.toLowerCase().replaceAll("[^a-zA-Z0-9]", "");
+    
+        // Check if the cleaned term is found in the cleaned title
+        return cleanedTitle.contains(cleanedTerm);
     }
     
 
-    private boolean checkIfTermInTitle(String term) {
-        // Implement the logic to check if the term is found in the document title
-        // Return true if the term is found in the title, false otherwise
-    }
-
     private Map<String, Double> getDocumentsContainingTerm(String term) {
-        // Retrieve the documents containing the given term from the inverted file
-        // Return a map of document IDs to their corresponding document similarity scores
+        // Retrieve the inverted file data structure
+        Map<String, List<String>> invertedFile = getInvertedFile(); // Replace with your actual implementation
+    
+        // Create a map to store document IDs and their similarity scores
+        Map<String, Double> documentScores = new HashMap<>();
+    
+        // Check if the term exists in the inverted file
+        if (invertedFile.containsKey(term)) {
+            List<String> documents = invertedFile.get(term);
+            
+            // Iterate over the documents and calculate the similarity scores
+            for (String documentId : documents) {
+                double similarityScore = calculateDocumentSimilarity(term, documentId); // Replace with your calculation method
+                documentScores.put(documentId, similarityScore);
+            }
+        }
+    
+        return documentScores;
     }
+    
 
     private Map<String, Double> sortDocumentScores(Map<String, Double> documentScores) {
-        // Implement the logic to sort the document scores in descending order based on the scores
-        // Return the sorted document scores
+        // Sort the document scores in descending order based on the scores
+        Comparator<Map.Entry<String, Double>> scoreComparator = Map.Entry.comparingByValue(Comparator.reverseOrder());
+        Map<String, Double> sortedDocumentScores = documentScores.entrySet()
+                .stream()
+                .sorted(scoreComparator)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+        
+        return sortedDocumentScores;
     }
 
     private List<String> rankDocuments(Map<String, Double> documentScores) {
-        // Sort and rank the documents based on their scores
+        // Sort the documents based on their scores
+        List<Map.Entry<String, Double>> sortedDocuments = new ArrayList<>(documentScores.entrySet());
+        sortedDocuments.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
+        
         // Apply the mechanism to favor matches in the title by boosting the rank of pages with a match in the title
-        // Return the ranked documents
+        List<String> rankedDocuments = new ArrayList<>();
+        for (Map.Entry<String, Double> entry : sortedDocuments) {
+            String documentId = entry.getKey();
+            boolean isInTitle = checkIfTermInTitle(documentId); // Assuming the documentId represents the document title
+            
+            // Boost the rank of pages with a match in the title
+            double boostedScore = entry.getValue();
+            if (isInTitle) {
+                boostedScore *= 1.5; // Increase the score by a factor (e.g., 1.5)
+            }
+            
+            // Add the document to the ranked list
+            rankedDocuments.add(documentId);
+        }
+        
+        return rankedDocuments;
     }
+    
 
-    // Other helper methods
 }
 
