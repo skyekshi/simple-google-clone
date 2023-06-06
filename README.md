@@ -8,3 +8,5 @@ In this project a naive search engine is created using HTML, CSS, PHP, Java, Jav
 - A web interface that accepts a user query in a text box, submits the query to the search engine, and displays the returned results to the user
 
 Due to resource limitation only a small set of websites are included. With more computing power, time, and space, and probably more complicated indexer (which I used Porter's Algorithm to enhance performance), and more fine-tuned retrieval function (modern models are not limited to the standard vector space comparison), a more powerful search engine can be created. Moreover, Google does a better job in crawling.
+
+A demonstration on local computer is possible with XAMPP server. However, one can always make their own choice.
